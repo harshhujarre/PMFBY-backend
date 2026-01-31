@@ -1,0 +1,12 @@
+/* PMFBY App Component Styles - Organic Precision Aesthetic */
+
+.app-header-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-brown-700) 0%,
+    var(--color-brown-600) 50%,
+    var(--color-brown-500) 100%
+  );
+}
+
+/* Additional component-specific styles can be added here if needed */

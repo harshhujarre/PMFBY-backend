@@ -1,0 +1,233 @@
+/**
+ * Tailwind CSS v4 Configuration
+ * For Tailwind v4, configuration is done via CSS @theme directive
+ */
+
+/* Import Tailwind's layers */
+@import "tailwindcss";
+
+/* Theme Configuration (Tailwind v4 CSS-based config) */
+@theme {
+  /* Custom color palette matching design tokens */
+  --color-brown-900: #3E2723;
+  --color-brown-800: #4E342E;
+  --color-brown-700: #5C4033;
+  --color-brown-600: #6D4C3D;
+  --color-brown-500: #8B4513;
+  --color-gold-500: #D4AF37;
+  --color-green-500: #4A7C4E;
+  
+  /* Font families */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* Import custom design tokens */
+@import "./design-tokens.css";
+
+/* Base layer styles - won't override Tailwind utilities */
+@layer base {
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+  }
+  
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Subtle grain texture overlay on body */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--texture-overlay);
+    opacity: var(--grain-opacity);
+    pointer-events: none;
+    z-index: var(--z-base);
+  }
+
+  #root {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    z-index: var(--z-base);
+  }
+}
+
+/* Custom Scrollbar - Earthy Tones */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brown-400);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-cream-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brown-500);
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-brown-400) var(--color-cream-dark);
+}
+
+/* Global Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+}
+
+@keyframes boundaryPulse {
+  0%, 100% {
+    stroke-opacity: 0.8;
+    stroke-width: 2;
+  }
+  50% {
+    stroke-opacity: 1;
+    stroke-width: 3;
+  }
+}
+
+/* Utility Classes */
+.animate-fadeIn {
+  animation: fadeIn var(--transition-slow) ease-out;
+}
+
+.animate-slideInUp {
+  animation: slideInUp var(--transition-slow) ease-out;
+}
+
+.animate-slideInDown {
+  animation: slideInDown var(--transition-slow) ease-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight var(--transition-slow) ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn var(--transition-slow) ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Text utilities */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Smooth transitions on interactive elements */
+button, a, input, textarea, select {
+  transition: all var(--transition-base);
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-gold-500);
+  outline-offset: 2px;
+}
