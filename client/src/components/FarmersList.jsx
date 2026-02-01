@@ -1,4 +1,4 @@
-const FarmersList = ({ farms }) => {
+const FarmersList = ({ farms, pagination, onNextPage, onPrevPage }) => {
   return (
     <div
       className="h-full flex flex-col overflow-hidden"
@@ -31,9 +31,26 @@ const FarmersList = ({ farms }) => {
             className="flex items-center gap-2 font-body text-sm"
             style={{ color: "var(--color-green-100)" }}
           >
-            <span className="font-semibold">{farms.length}</span>
-            <span>{farms.length === 1 ? "farmer" : "farmers"}</span>
-            <span className="opacity-60">in current view</span>
+            {pagination && pagination.total > 0 ? (
+              <>
+                <span className="font-semibold">
+                  Showing {(pagination.page - 1) * pagination.limit + 1}-
+                  {Math.min(
+                    pagination.page * pagination.limit,
+                    pagination.total,
+                  )}
+                </span>
+                <span>of</span>
+                <span className="font-semibold">{pagination.total}</span>
+                <span>{pagination.total === 1 ? "farmer" : "farmers"}</span>
+              </>
+            ) : (
+              <>
+                <span className="font-semibold">{farms.length}</span>
+                <span>{farms.length === 1 ? "farmer" : "farmers"}</span>
+                <span className="opacity-60">in current view</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -53,13 +70,13 @@ const FarmersList = ({ farms }) => {
               className="font-display text-xl mb-2"
               style={{ color: "var(--text-secondary)" }}
             >
-              No Farms Visible
+              No Farms Found
             </p>
             <p
               className="font-body text-sm mb-4"
               style={{ color: "var(--text-muted)" }}
             >
-              Zoom out or pan the map to discover farmers in different regions
+              Try adjusting your filters or zoom out on the map
             </p>
             <div
               className="inline-block px-4 py-2 rounded-lg text-xs font-mono"
@@ -68,7 +85,7 @@ const FarmersList = ({ farms }) => {
                 color: "var(--text-muted)",
               }}
             >
-              💡 Try zooming out on the map
+              💡 Try selecting a different region
             </div>
           </div>
         ) : (
@@ -190,8 +207,65 @@ const FarmersList = ({ farms }) => {
         )}
       </div>
 
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <div
+          className="p-4 border-t"
+          style={{
+            backgroundColor: "var(--bg-secondary)",
+            borderColor: "var(--border-color)",
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <button
+              onClick={onPrevPage}
+              disabled={pagination.page === 1}
+              className="px-4 py-2 rounded-lg font-body text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor:
+                  pagination.page === 1
+                    ? "var(--color-neutral-200)"
+                    : "var(--color-green-600)",
+                color:
+                  pagination.page === 1
+                    ? "var(--text-muted)"
+                    : "var(--text-inverse)",
+              }}
+            >
+              ← Previous
+            </button>
+
+            <div
+              className="font-body text-sm"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              Page <span className="font-bold">{pagination.page}</span> of{" "}
+              <span className="font-bold">{pagination.totalPages}</span>
+            </div>
+
+            <button
+              onClick={onNextPage}
+              disabled={pagination.page >= pagination.totalPages}
+              className="px-4 py-2 rounded-lg font-body text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor:
+                  pagination.page >= pagination.totalPages
+                    ? "var(--color-neutral-200)"
+                    : "var(--color-green-600)",
+                color:
+                  pagination.page >= pagination.totalPages
+                    ? "var(--text-muted)"
+                    : "var(--text-inverse)",
+              }}
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Footer Info */}
-      {farms.length > 0 && (
+      {farms.length > 0 && !pagination && (
         <div
           className="p-4"
           style={{

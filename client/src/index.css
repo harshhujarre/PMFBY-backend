@@ -3,6 +3,12 @@
  * For Tailwind v4, configuration is done via CSS @theme directive
  */
 
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+/* Import custom design tokens */
+@import "./design-tokens.css";
+
 /* Import Tailwind's layers */
 @import "tailwindcss";
 
@@ -21,13 +27,6 @@
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body: 'IBM Plex Sans', system-ui, sans-serif;
 }
-
-/* Google Fonts Import */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-/* Import custom design tokens */
-@import "./design-tokens.css";
-
 /* Base layer styles - won't override Tailwind utilities */
 @layer base {
   html {

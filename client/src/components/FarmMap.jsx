@@ -1,13 +1,20 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import maplibregl from "maplibre-gl";
 import MapControls from "./MapControls";
-import { farmsToGeoJSON, getVisibleFarms } from "../utils/mapHelpers";
+import {
+  farmsToGeoJSON,
+  getVisibleFarms,
+  getFarmHealthStatus,
+  formatNDVI,
+} from "../utils/mapHelpers";
 
 const FarmMap = ({ farms, onVisibleFarmsChange }) => {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentLayer, setCurrentLayer] = useState("satellite");
+  const [ndviData, setNdviData] = useState({});
+  const [farmHealthMap, setFarmHealthMap] = useState({});
 
   // Map control handlers
   const handleZoomIn = () => {
@@ -45,6 +52,48 @@ const FarmMap = ({ farms, onVisibleFarmsChange }) => {
     }
     setCurrentLayer(layer);
   };
+
+  // Fetch latest NDVI data for all farms
+  const fetchNDVIData = useCallback(async () => {
+    try {
+      const healthMap = {};
+
+      for (const farm of farms) {
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/farms/${farm.id}/ndvi/latest`,
+          );
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+              const health = getFarmHealthStatus(
+                data.data.ndvi,
+                farm.baselineNDVI,
+              );
+              healthMap[farm.id] = {
+                ...data.data,
+                health,
+              };
+            }
+          } else if (response.status === 404) {
+            // NDVI data not generated yet - this is normal on first load
+            // Silently skip without logging error
+            continue;
+          }
+        } catch (err) {
+          // Only log non-404 errors
+          if (!err.message.includes("404")) {
+            console.error(`Error fetching NDVI for farm ${farm.id}:`, err);
+          }
+        }
+      }
+
+      setFarmHealthMap(healthMap);
+      setNdviData(healthMap);
+    } catch (error) {
+      console.error("Error fetching NDVI data:", error);
+    }
+  }, [farms]);
 
   // Update visible farms based on viewport
   const updateVisibleFarms = useCallback(() => {
@@ -144,33 +193,70 @@ const FarmMap = ({ farms, onVisibleFarmsChange }) => {
       data: farmsToGeoJSON(farms),
     });
 
-    // Add fill layer for farm polygons with crop-specific colors
+    // Add fill layer for farm polygons with HEALTH-BASED colors
     map.addLayer({
       id: layerId,
       type: "fill",
       source: sourceId,
       paint: {
-        "fill-color": "#4A7C4E", // Deep crop green from design tokens
-        "fill-opacity": 0.5,
+        // Dynamic color based on farm health
+        "fill-color": [
+          "case",
+          // Use farm health data to determine color
+          ...farms.flatMap((farm) => {
+            const health =
+              farmHealthMap[farm.id]?.health || getFarmHealthStatus(null, null);
+            return [["==", ["get", "id"], farm.id], health.fillColor];
+          }),
+          "#9E9E9E", // Default gray for no data
+        ],
+        "fill-opacity": [
+          "case",
+          ...farms.flatMap((farm) => {
+            const health = farmHealthMap[farm.id]?.health || { opacity: 0.3 };
+            return [["==", ["get", "id"], farm.id], health.opacity];
+          }),
+          0.3,
+        ],
       },
     });
 
-    // Add outline layer with golden border
+    // Add outline layer with health-based border color
     map.addLayer({
       id: outlineLayerId,
       type: "line",
       source: sourceId,
       paint: {
-        "line-color": "#D4AF37", // Harvest gold
-        "line-width": 2.5,
+        "line-color": [
+          "case",
+          ...farms.flatMap((farm) => {
+            const health = farmHealthMap[farm.id]?.health || {
+              color: "#9E9E9E",
+            };
+            return [["==", ["get", "id"], farm.id], health.color];
+          }),
+          "#9E9E9E",
+        ],
+        "line-width": [
+          "case",
+          ...farms.flatMap((farm) => {
+            const health = farmHealthMap[farm.id]?.health;
+            const isPulsingFarm = health?.pulse || false;
+            return [["==", ["get", "id"], farm.id], isPulsingFarm ? 4 : 2.5];
+          }),
+          2.5,
+        ],
         "line-opacity": 0.9,
       },
     });
 
-    // Add click interaction with custom styled popup
+    // Add click interaction with custom styled popup showing HEALTH STATUS
     map.on("click", layerId, (e) => {
       const feature = e.features[0];
-      const { farmerName, crop, location } = feature.properties;
+      const { id, farmerName, crop, location, baselineNDVI } =
+        feature.properties;
+      const farmHealth = farmHealthMap[id];
+      const healthInfo = farmHealth?.health || getFarmHealthStatus(null, null);
 
       new maplibregl.Popup({
         closeButton: true,
@@ -186,17 +272,30 @@ const FarmMap = ({ farms, onVisibleFarmsChange }) => {
             font-family: 'IBM Plex Sans', sans-serif;
             background: linear-gradient(135deg, #FAF8F3 0%, #FFFFFF 100%);
             border-radius: 8px;
+            border: 3px solid ${healthInfo.color};
           ">
             <div style="
               font-family: 'Playfair Display', serif;
               font-size: 18px;
               font-weight: 600;
               color: #5C4033;
-              margin-bottom: 12px;
+              margin-bottom: 8px;
               text-transform: capitalize;
-              border-bottom: 2px solid #D4AF37;
-              padding-bottom: 8px;
             ">${farmerName}</div>
+            
+            <!-- Health Status Badge -->
+            <div style="
+              display: inline-block;
+              padding: 4px 12px;
+              background: ${healthInfo.color};
+              color: white;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 700;
+              text-transform: uppercase;
+              margin-bottom: 12px;
+              letter-spacing: 0.5px;
+            ">${healthInfo.label}</div>
             
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <div style="
@@ -229,6 +328,30 @@ const FarmMap = ({ farms, onVisibleFarmsChange }) => {
                 </div>
               </div>
             </div>
+            
+            <!-- NDVI Health Info -->
+            ${
+              farmHealth
+                ? `
+            <div style="
+              margin-top: 12px;
+              padding: 10px;
+              background: rgba(${healthInfo.status === "severe" || healthInfo.status === "critical" ? "220, 38, 38" : "74, 124, 78"}, 0.1);
+              border-radius: 6px;
+              border-left: 3px solid ${healthInfo.color};
+            ">
+              <div style="font-size: 10px; color: #757575; text-transform: uppercase; margin-bottom: 4px;">Crop Health (NDVI)</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <span style="font-size: 16px; font-weight: 700; color: ${healthInfo.color};">${formatNDVI(farmHealth.ndvi)}</span>
+                  <span style="font-size: 11px; color: #999; margin-left: 4px;">/ ${formatNDVI(baselineNDVI)}</span>
+                </div>
+                <div style="font-size: 20px;">${healthInfo.status === "healthy" ? "✓" : healthInfo.status === "severe" ? "🚨" : "⚠️"}</div>
+              </div>
+            </div>
+            `
+                : ""
+            }
           </div>
         `,
         )
@@ -246,7 +369,18 @@ const FarmMap = ({ farms, onVisibleFarmsChange }) => {
 
     // Update visible farms after adding layers
     updateVisibleFarms();
-  }, [farms, mapLoaded, updateVisibleFarms]);
+  }, [farms, mapLoaded, farmHealthMap, updateVisibleFarms]);
+
+  // Fetch NDVI data when farms or map loads
+  useEffect(() => {
+    if (mapLoaded && farms && farms.length > 0) {
+      fetchNDVIData();
+
+      // Set up periodic refresh (every 60 seconds)
+      const intervalId = setInterval(fetchNDVIData, 60000);
+      return () => clearInterval(intervalId);
+    }
+  }, [mapLoaded, farms, fetchNDVIData]);
 
   // Listen to map movement events
   useEffect(() => {

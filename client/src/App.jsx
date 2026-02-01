@@ -1,19 +1,43 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import FarmMap from "./components/FarmMap";
 import FarmersList from "./components/FarmersList";
 import StatsPanel from "./components/StatsPanel";
+import AlertsPanel from "./components/AlertsPanel";
+import DivisionSelector from "./components/DivisionSelector";
+import SearchBar from "./components/SearchBar";
 import NDVIDashboard from "./pages/NDVIDashboard";
 import { useFarms } from "./hooks/useFarms";
+import toast from "react-hot-toast";
 import "./App.css";
 
 function App() {
-  const { farms, loading, error } = useFarms("Kolhapur");
+  const {
+    farms,
+    loading,
+    error,
+    updateFilters,
+    filters,
+    pagination,
+    nextPage,
+    prevPage,
+    searchQuery,
+    updateSearch,
+  } = useFarms({
+    district: "Kolhapur",
+  });
   const [visibleFarms, setVisibleFarms] = useState([]);
   const [currentView, setCurrentView] = useState("map"); // 'map' or 'ndvi'
+  const [selectedFarmId, setSelectedFarmId] = useState(null);
 
-  const handleVisibleFarmsChange = (newVisibleFarms) => {
+  const handleVisibleFarmsChange = useCallback((newVisibleFarms) => {
     setVisibleFarms(newVisibleFarms);
-  };
+  }, []);
+
+  const handleAlertClick = useCallback((alert) => {
+    setSelectedFarmId(alert.farmId);
+    setCurrentView("ndvi");
+    toast.success(`Viewing ${alert.farmerName}'s farm`);
+  }, []);
 
   // Enhanced loading state with agricultural spinner
   if (loading) {
@@ -269,15 +293,42 @@ function App() {
           />
         </div>
 
-        {/* Sidebar Section - Farmers List */}
+        {/* Alerts Panel Overlay (top-right) */}
+        <AlertsPanel onAlertClick={handleAlertClick} />
+
+        {/* Sidebar Section - Farmers List & Division Selector */}
         <div
-          className="w-96 overflow-hidden animate-slideInRight"
+          className="w-96 flex flex-col overflow-hidden animate-slideInRight bg-white/50 backdrop-blur-sm relative z-10"
           style={{
             borderLeft: "1px solid var(--border-color)",
             boxShadow: "var(--shadow-xl)",
           }}
         >
-          <FarmersList farms={visibleFarms} />
+          {/* Division Selector */}
+          <div className="p-4 bg-white/80 border-b border-brown-200">
+            <DivisionSelector
+              onSelectionChange={updateFilters}
+              currentFilters={filters}
+            />
+          </div>
+
+          {/* Search Bar */}
+          <div className="p-4 bg-white/80 border-b border-brown-200">
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={updateSearch}
+            />
+          </div>
+
+          {/* Farmers List */}
+          <div className="flex-1 overflow-hidden">
+            <FarmersList
+              farms={visibleFarms}
+              pagination={pagination}
+              onNextPage={nextPage}
+              onPrevPage={prevPage}
+            />
+          </div>
         </div>
       </div>
     </div>

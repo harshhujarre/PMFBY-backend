@@ -21,6 +21,14 @@ const farmsData = [
       phone: "+91-9876543210",
       aadhar: "1234-5678-9012",
     },
+    // Phase 2: Administrative Hierarchy
+    administrativeData: {
+      state: "Maharashtra",
+      district: "Kolhapur",
+      tehsil: "Shahuwadi",
+      village: "Nesari",
+      pincode: "416213",
+    },
   },
   {
     id: 2,
@@ -42,6 +50,13 @@ const farmsData = [
     contactInfo: {
       phone: "+91-9876543211",
       aadhar: "1234-5678-9013",
+    },
+    administrativeData: {
+      state: "Maharashtra",
+      district: "Kolhapur",
+      tehsil: "Shahuwadi",
+      village: "Nesari",
+      pincode: "416213",
     },
   },
   {
@@ -65,6 +80,13 @@ const farmsData = [
       phone: "+91-9876543212",
       aadhar: "1234-5678-9014",
     },
+    administrativeData: {
+      state: "Maharashtra",
+      district: "Kolhapur",
+      tehsil: "Radhanagari",
+      village: "Kasba Walva",
+      pincode: "416211",
+    },
   },
   {
     id: 4,
@@ -87,7 +109,16 @@ const farmsData = [
       phone: "+91-9876543213",
       aadhar: "1234-5678-9015",
     },
+    administrativeData: {
+      state: "Maharashtra",
+      district: "Kolhapur",
+      tehsil: "Karveer",
+      village: "Nigave",
+      pincode: "416207",
+    },
   },
 ];
+
+export const getFarms = () => farmsData;
 
 export default farmsData;
