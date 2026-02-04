@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 
-const API_BASE_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from "../config/api.js";
+
+const API_BASE = `${API_BASE_URL}/api`;
 
 /**
  * Custom hook for managing NDVI data
@@ -27,7 +29,7 @@ export function useNDVI(farmId = null) {
 
       try {
         const response = await fetch(
-          `${API_BASE_URL}/farms/${targetFarmId}/ndvi?days=${days}`,
+          `${API_BASE}/farms/${targetFarmId}/ndvi?days=${days}`,
         );
 
         if (!response.ok) {
@@ -59,7 +61,7 @@ export function useNDVI(farmId = null) {
 
       try {
         const response = await fetch(
-          `${API_BASE_URL}/farms/${targetFarmId}/ndvi/latest`,
+          `${API_BASE}/farms/${targetFarmId}/ndvi/latest`,
         );
 
         if (!response.ok) {
@@ -88,7 +90,7 @@ export function useNDVI(farmId = null) {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/ndvi/all`);
+      const response = await fetch(`${API_BASE}/ndvi/all`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch all farms NDVI");
@@ -119,7 +121,7 @@ export function useNDVI(farmId = null) {
         if (targetFarmId) body.farmId = targetFarmId;
         if (days) body.days = days;
 
-        const response = await fetch(`${API_BASE_URL}/ndvi/simulate`, {
+        const response = await fetch(`${API_BASE}/ndvi/simulate`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -170,7 +172,7 @@ export function useNDVI(farmId = null) {
       setError(null);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/ndvi/disaster`, {
+        const response = await fetch(`${API_BASE}/ndvi/disaster`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -217,7 +219,7 @@ export function useNDVI(farmId = null) {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/ndvi/clear`, {
+      const response = await fetch(`${API_BASE}/ndvi/clear`, {
         method: "DELETE",
       });
 

@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config/api.js";
 
 export default function DivisionSelector({
   onSelectionChange,
@@ -20,7 +21,7 @@ export default function DivisionSelector({
 
   const [loading, setLoading] = useState(false);
 
-  const API_BASE_URL = "http://localhost:3000/api";
+  const API_BASE = `${API_BASE_URL}/api`;
 
   // Fetch Districts on mount
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function DivisionSelector({
 
   const fetchDistricts = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/divisions/districts`);
+      const res = await fetch(`${API_BASE}/divisions/districts`);
       const data = await res.json();
       if (data.success) setDistricts(data.data);
     } catch (err) {
@@ -73,7 +74,7 @@ export default function DivisionSelector({
     try {
       setLoading(true);
       const res = await fetch(
-        `${API_BASE_URL}/divisions/tehsils?district=${district}`,
+        `${API_BASE}/divisions/tehsils?district=${district}`,
       );
       const data = await res.json();
       if (data.success) setTehsils(data.data);
@@ -88,7 +89,7 @@ export default function DivisionSelector({
     try {
       setLoading(true);
       const res = await fetch(
-        `${API_BASE_URL}/divisions/villages?tehsil=${tehsil}`,
+        `${API_BASE}/divisions/villages?tehsil=${tehsil}`,
       );
       const data = await res.json();
       if (data.success) setVillages(data.data);

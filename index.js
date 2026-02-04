@@ -9,18 +9,43 @@ import claimsRoutes from "./routes/claims.js";
 import { monitorAllFarms } from "./services/ndviMonitor.js";
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+// CORS Configuration - Allow localhost and production Vercel URL
+const allowedOrigins = [
+  "https://pmfby-ten.vercel.app/",
+  "https://pmfby-ten.vercel.app",
+  "http://localhost:3001", 
+  process.env.FRONTEND_URL, // Vercel production URL
+].filter(Boolean); // Remove undefined values
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3001",
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+
+      // Check if origin is in allowed list or is a Vercel preview URL
+      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
 
 app.use(express.json());
+
+// Health Check Route (for Render deployment)
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
 
 // API Routes
 app.use("/api", divisionRoutes); // Administrative Division routes - MUST be before farmsRoutes to avoid collision with /:id
@@ -29,7 +54,7 @@ app.use("/api", ndviRoutes); // NDVI routes
 app.use("/api", alertRoutes); // Alert & Monitoring routes
 app.use("/api", claimsRoutes); // Claims & Approval routes
 
-// Health check route
+// Root route
 app.get("/", (req, res) => {
   res.json({ message: "PMFBY API Server is running" });
 });
@@ -51,8 +76,9 @@ cron.schedule("*/5 * * * *", () => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("🌾 PMFBY API Server is running on port 3000");
+app.listen(PORT, () => {
+  console.log(`🌾 PMFBY API Server is running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log("📡 NDVI Monitoring: Every 5 minutes (demo mode)");
   console.log(
     "💡 Tip: Change to '0 0 */3 * *' for 3-day production schedule\n",

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { API_BASE_URL } from "../config/api.js";
 
 export const useFarms = (initialFilters = {}) => {
   const [farms, setFarms] = useState([]);
@@ -38,7 +39,7 @@ export const useFarms = (initialFilters = {}) => {
         queryParams.append("page", currentPage);
         queryParams.append("limit", limit);
 
-        const url = `http://localhost:3000/api/farms/by-division?${queryParams.toString()}`;
+        const url = `${API_BASE_URL}/api/farms/by-division?${queryParams.toString()}`;
 
         console.log("Fetching farms with URL:", url);
 

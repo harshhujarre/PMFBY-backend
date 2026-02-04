@@ -1,5 +1,5 @@
 {
-  "name": "pmfby",
+  "name": "pmfby-backend",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
@@ -8,10 +8,19 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": [],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "agriculture",
+    "insurance",
+    "pmfby",
+    "api"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "PMFBY Agricultural Insurance API - Backend service for farm monitoring and claims management",
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",

@@ -61,7 +61,7 @@ const FarmMap = ({ farms, onVisibleFarmsChange }) => {
       for (const farm of farms) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/farms/${farm.id}/ndvi/latest`,
+            `${API_BASE_URL}/api/farms/${farm.id}/ndvi/latest`,
           );
           if (response.ok) {
             const data = await response.json();

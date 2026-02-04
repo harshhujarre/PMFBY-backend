@@ -5,7 +5,9 @@ import RegionalHealthDashboard from "../components/RegionalHealthDashboard";
 import PayoutBreakdown from "../components/PayoutBreakdown";
 import "./OfficerDashboard.css";
 
-const API_BASE = "http://localhost:3000/api";
+import { API_BASE_URL } from "../config/api.js";
+
+const API_BASE = `${API_BASE_URL}/api`;
 
 /**
  * Officer Dashboard Layout

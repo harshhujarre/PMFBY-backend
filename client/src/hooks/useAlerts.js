@@ -5,7 +5,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const API_BASE_URL = "http://localhost:3000/api";
+import { API_BASE_URL } from "../config/api.js";
+
+const API_BASE = `${API_BASE_URL}/api`;
 
 export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
   const [alerts, setAlerts] = useState([]);
@@ -27,7 +29,7 @@ export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
       if (filters.severity) queryParams.append("severity", filters.severity);
       if (filters.farmId) queryParams.append("farmId", filters.farmId);
 
-      const url = `${API_BASE_URL}/alerts${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+      const url = `${API_BASE}/alerts${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -59,7 +61,7 @@ export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/alerts/active`);
+      const response = await fetch(`${API_BASE}/alerts/active`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -87,7 +89,7 @@ export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
    */
   const fetchAlertStats = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/alerts/stats`);
+      const response = await fetch(`${API_BASE}/alerts/stats`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -113,7 +115,7 @@ export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
   const acknowledgeAlert = useCallback(async (alertId) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/alerts/${alertId}/acknowledge`,
+        `${API_BASE}/alerts/${alertId}/acknowledge`,
         {
           method: "PUT",
           headers: {
@@ -152,15 +154,12 @@ export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
    */
   const resolveAlert = useCallback(async (alertId) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/alerts/${alertId}/resolve`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await fetch(`${API_BASE}/alerts/${alertId}/resolve`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -193,7 +192,7 @@ export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
   const generateTestAlert = useCallback(
     async (farmId = 1, severity = "critical") => {
       try {
-        const response = await fetch(`${API_BASE_URL}/alerts/test`, {
+        const response = await fetch(`${API_BASE}/alerts/test`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -227,7 +226,7 @@ export function useAlerts(autoRefresh = true, refreshInterval = 30000) {
    */
   const clearAllAlerts = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/alerts/clear`, {
+      const response = await fetch(`${API_BASE}/alerts/clear`, {
         method: "DELETE",
       });
 
