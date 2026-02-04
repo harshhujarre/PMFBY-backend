@@ -11,27 +11,10 @@ import { monitorAllFarms } from "./services/ndviMonitor.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS Configuration - Allow localhost and production Vercel URL
-const allowedOrigins = [
-  "https://pmfby-ten.vercel.app/",
-  "https://pmfby-ten.vercel.app",
-  "http://localhost:3001", 
-  process.env.FRONTEND_URL, // Vercel production URL
-].filter(Boolean); // Remove undefined values
-
+// CORS Configuration - Allow all origins (demo app)
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, curl, etc)
-      if (!origin) return callback(null, true);
-
-      // Check if origin is in allowed list or is a Vercel preview URL
-      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true, // Allow all origins
     credentials: true,
   }),
 );
